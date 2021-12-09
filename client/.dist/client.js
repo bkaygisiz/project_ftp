@@ -18,8 +18,6 @@ var rl = _readline["default"].createInterface({
   output: process.stdout
 });
 
-var cmd = "";
-var arg = "";
 var wstream;
 
 function connect(host, port) {
@@ -27,11 +25,6 @@ function connect(host, port) {
     console.log('connected to server');
     rl.question('ftp@' + host + ':' + port + ": ", function (command) {
       client.write(command);
-      /*cmd = command.split(' ')[0];
-      if (cmd == 'RETR') {
-          arg = command.split(' ')[1];
-          console.log(arg);
-      }*/
     });
     client.on('data', function (data) {
       if (data.toString().split(':::')[0] == "COPY") {
@@ -44,11 +37,6 @@ function connect(host, port) {
 
       rl.question('ftp@' + host + ':' + port + ": ", function (command) {
         client.write(command);
-        /*cmd = command.split(' ')[0];
-        if (cmd == 'RETR') {
-            arg = command.split(' ')[1];
-            console.log(arg);
-        }*/
       });
     });
   });
