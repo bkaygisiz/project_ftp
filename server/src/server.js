@@ -8,25 +8,19 @@ commands.LIST = list;
 commands.CWD = cwd;
 commands.PWD = pwd;
 commands.HELP = help;
+commands.RETR = retr;
+
 let users = JSON.parse(fs.readFileSync('users.json'));
 let currentUser = "";
 
 export function launch(host, port) {
-    const server = createServer({host: host}, (c) => {
+    const server = createServer({ host: host }, (c) => {
         c.write('220 Connexion established');
         c.on('data', (data) => {
             let dataSplit = data.toString().split(' ');
-            switch(dataSplit[0]) {
-                case 'RETR':
-                    let read = fs.createReadStream(dataSplit[1]);
-                    read.on('data', (data) => {
-                        c.write(data);
-                    })
-                    break;
-                case 'STOR':
-                    break;
-                default:
-                    c.write(check(dataSplit[0], dataSplit[1]));
+            let val = check(dataSplit[0], dataSplit[1], c);
+            if (typeof val === 'string') {
+                c.write(val);
             }
         })
         c.on('end', () => {
@@ -39,29 +33,29 @@ export function launch(host, port) {
     })
 }
 
-function check(command, argument) {
+function check(command, argument, c) {
     if (command in commands) {
-        if(argument)
-            return(commands[command](argument));
-        return(commands[command]());
+        if (argument)
+            return (commands[command](argument, c));
+        return (commands[command]());
     }
     else {
-        return('502 command doesn exists');
+        return ('502 command doesn exists');
     }
 }
 
 function user(username) {
-    if(username in users) {
+    if (username in users) {
         currentUser = username;
-        return("331 User exists waiting for pwd");
+        return ("331 User exists waiting for pwd");
     }
-    return("User does not exists");
+    return ("User does not exists");
 }
 
 function pass(password) {
     if (users[currentUser] == password)
-        return("230 authentification succeeded");
-    return("430 Authentification failed, wrong ids");
+        return ("230 authentification succeeded");
+    return ("430 Authentification failed, wrong ids");
 }
 
 function list() {
@@ -76,10 +70,10 @@ function list() {
 function cwd(path) {
     try {
         process.chdir(path);
-        return(process.cwd());
+        return (process.cwd());
     }
     catch (e) {
-        return(e.toString());
+        return (e.toString());
     }
 }
 
@@ -94,4 +88,12 @@ function help() {
         str += line + "\n"
     })
     return str;
+}
+
+function retr(argument, c) {
+    let read = fs.createReadStream(argument, 'utf8');
+    read.on('data', data => {
+        c.write("COPY:::"+argument+":::"+data);
+    })
+    return 0;
 }
