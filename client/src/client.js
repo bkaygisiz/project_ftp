@@ -7,24 +7,37 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 let wstream;
+let cmd = "";
+let arg = ""
 
 export function connect(host, port) {
     const client = createConnection(port, host, () => {
         console.log('connected to server');
         rl.question('ftp@' + host + ':' + port + ": ", function(command) {
             client.write(command);
+            cmd = command.split(' ')[0];
+            arg = command.split(' ')[1];
         })
         client.on('data', (data) => {
-            if (data.toString().split(':::')[0] == "COPY") {
-                wstream = fs.createWriteStream(data.toString().split(':::')[1]);
-                wstream.write(data.toString().split(':::')[2]);
-                wstream.end();
+            if (cmd == "RETR") {
+                wstream = fs.createWriteStream(arg);
+                wstream.write(data);
+                cmd = "";
+            }
+            else if (cmd == "STOR") {
+                let read = fs.createReadStream(arg);
+                read.on("data", (data) => {
+                    client.write(data);
+                })
+                cmd = "";
             }
             else {
                 console.log(data.toString());
             }
             rl.question('ftp@' + host + ':' + port + ": ", function(command) {
                 client.write(command);
+                cmd = command.split(' ')[0];
+                arg = command.split(' ')[1];
             })
         })
     })

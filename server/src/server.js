@@ -9,18 +9,27 @@ commands.CWD = cwd;
 commands.PWD = pwd;
 commands.HELP = help;
 commands.RETR = retr;
+commands.STOR = stor;
 
 let users = JSON.parse(fs.readFileSync('users.json'));
 let currentUser = "";
+let cmd = "";
+let file = "";
+let wstream;
 
 export function launch(host, port) {
     const server = createServer({ host: host }, (c) => {
         c.write('220 Connexion established');
         c.on('data', (data) => {
-            let dataSplit = data.toString().split(' ');
-            let val = check(dataSplit[0], dataSplit[1], c);
-            if (typeof val === 'string') {
-                c.write(val);
+            if(cmd == "STOR") {
+                start_Copy(c, data);
+            }
+            else {
+                let dataSplit = data.toString().split(' ');
+                let val = check(dataSplit[0], dataSplit[1], c);
+                if (typeof val === 'string') {
+                    c.write(val);
+                }
             }
         })
         c.on('end', () => {
@@ -91,9 +100,24 @@ function help() {
 }
 
 function retr(argument, c) {
-    let read = fs.createReadStream(argument, 'utf8');
+    let read = fs.createReadStream(argument);
     read.on('data', data => {
-        c.write("COPY:::"+argument+":::"+data);
+        c.write(data);
     })
     return 0;
+}
+
+function stor(argument, c) {
+    cmd = "STOR";
+    file = argument;
+    console.log(cmd + " file = " + file);
+    c.write('Send me');
+}
+
+function start_Copy(c, data) {
+    wstream = fs.createWriteStream(file);
+    wstream.write(data);
+    wstream.on('finish', () => {
+        console.log('ended');
+    })
 }
