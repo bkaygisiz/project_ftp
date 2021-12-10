@@ -1,12 +1,18 @@
 import { createServer } from 'net';
 import fs from 'fs';
 import { list } from './commands/list';
+import { user } from './commands/user';
+import { stor } from './commands/stor';
+import { start_Copy } from './commands/stor';
+import { pass } from './commands/pass'
 import { cwd } from './commands/cwd';
 import { pwd } from './commands/pwd';
 import { help } from './commands/help';
 import { retr } from './commands/retr';
+import { currentUsr } from './commands/user';
+import { fileName } from './commands/stor';
+import { cmd_val } from './commands/stor'
 let commands = JSON.parse(fs.readFileSync('commands.json'));
-let users = JSON.parse(fs.readFileSync('users.json'));
 commands.USER = user;
 commands.PASS = pass;
 commands.LIST = list;
@@ -16,9 +22,9 @@ commands.HELP = help;
 commands.RETR = retr;
 commands.STOR = stor;
 
-let currentUser = "";
+export let currentUser = "";
 let cmd = "";
-let file = "";
+export let file = "";
 let wstream;
 
 export function launch(host, port) {
@@ -31,6 +37,9 @@ export function launch(host, port) {
             else {
                 let dataSplit = data.toString().split(' ');
                 let val = check(dataSplit[0], dataSplit[1], c);
+                currentUser = currentUsr;
+                file = fileName;
+                cmd = cmd_val;
                 if (typeof val === 'string') {
                     c.write(val);
                 }
@@ -55,33 +64,4 @@ function check(command, argument, c) {
     else {
         return ('502 command doesn exists');
     }
-}
-
-function stor(argument, c) {
-    cmd = "STOR";
-    file = argument;
-    console.log(cmd + " file = " + file);
-    c.write('Send me');
-}
-
-function start_Copy(c, data) {
-    wstream = fs.createWriteStream(file);
-    wstream.write(data);
-    wstream.on('finish', () => {
-        console.log('ended');
-    })
-}
-
-function user(username) {
-    if (username in users) {
-        currentUser = username;
-        return ("331 User exists waiting for pwd");
-    }
-    return ("User does not exists");
-}
-
-function pass(password) {
-    if (users[currentUser] == password)
-        return ("230 authentification succeeded");
-    return ("430 Authentification failed, wrong ids");
 }
