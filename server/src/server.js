@@ -1,15 +1,12 @@
 import { createServer } from 'net';
 import fs from 'fs';
-import { user } from './commands/user';
-import { pass } from './commands/pass';
 import { list } from './commands/list';
 import { cwd } from './commands/cwd';
 import { pwd } from './commands/pwd';
 import { help } from './commands/help';
 import { retr } from './commands/retr';
-import { stor } from './commands/stor';
-import { start_Copy } from './commands/stor';
 let commands = JSON.parse(fs.readFileSync('commands.json'));
+let users = JSON.parse(fs.readFileSync('users.json'));
 commands.USER = user;
 commands.PASS = pass;
 commands.LIST = list;
@@ -58,4 +55,33 @@ function check(command, argument, c) {
     else {
         return ('502 command doesn exists');
     }
+}
+
+function stor(argument, c) {
+    cmd = "STOR";
+    file = argument;
+    console.log(cmd + " file = " + file);
+    c.write('Send me');
+}
+
+function start_Copy(c, data) {
+    wstream = fs.createWriteStream(file);
+    wstream.write(data);
+    wstream.on('finish', () => {
+        console.log('ended');
+    })
+}
+
+function user(username) {
+    if (username in users) {
+        currentUser = username;
+        return ("331 User exists waiting for pwd");
+    }
+    return ("User does not exists");
+}
+
+function pass(password) {
+    if (users[currentUser] == password)
+        return ("230 authentification succeeded");
+    return ("430 Authentification failed, wrong ids");
 }
