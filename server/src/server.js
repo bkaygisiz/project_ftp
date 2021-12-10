@@ -9,6 +9,7 @@ import { cwd } from './commands/cwd';
 import { pwd } from './commands/pwd';
 import { help } from './commands/help';
 import { retr } from './commands/retr';
+import { quit } from './commands/quit';
 import { currentUsr } from './commands/user';
 import { fileName } from './commands/stor';
 import { cmd_val } from './commands/stor'
@@ -65,8 +66,4 @@ function check(command, argument, c) {
     else {
         return ('502 command doesn exists');
     }
-}
-
-function quit(c) {
-    c.end();
 }
