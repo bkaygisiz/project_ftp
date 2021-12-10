@@ -1,6 +1,7 @@
 import { createConnection } from 'net';
 import readline from 'readline';
 import fs from 'fs';
+import { CLIENT_RENEG_WINDOW } from 'tls';
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -39,6 +40,9 @@ export function connect(host, port) {
                 cmd = command.split(' ')[0];
                 arg = command.split(' ')[1];
             })
+        })
+        client.on('end', () => {
+            console.log("221 connection ended");
         })
     })
 }

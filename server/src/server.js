@@ -21,6 +21,7 @@ commands.PWD = pwd;
 commands.HELP = help;
 commands.RETR = retr;
 commands.STOR = stor;
+commands.QUIT = quit;
 
 export let currentUser = "";
 let cmd = "";
@@ -59,9 +60,13 @@ function check(command, argument, c) {
     if (command in commands) {
         if (argument)
             return (commands[command](argument, c));
-        return (commands[command]());
+        return (commands[command](c));
     }
     else {
         return ('502 command doesn exists');
     }
+}
+
+function quit(c) {
+    c.end();
 }

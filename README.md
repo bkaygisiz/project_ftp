@@ -30,6 +30,7 @@ cd ../client/
 npm run dev <host> <port>
 ```
 host is normally localhost, and you choose the port you want to use
+You can now type the comands you want !
 
 ## Help
 Run the command HELP on client to see all the commands
