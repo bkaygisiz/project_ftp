@@ -27,7 +27,6 @@ commands.QUIT = quit;
 export let currentUser = "";
 let cmd = "";
 export let file = "";
-let wstream;
 
 export function launch(host, port) {
     const server = createServer({ host: host }, (c) => {

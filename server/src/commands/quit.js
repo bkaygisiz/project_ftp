@@ -1,3 +1,3 @@
 export function quit(c) {
-    c.end();
+    c.destroy();
 }
